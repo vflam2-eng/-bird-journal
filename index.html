@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bird Journal</title>
+<style>
+body { font-family: Arial; padding: 16px; background:#f4f7f3; }
+h1 { color:#234; }
+.card { background:white; padding:14px; margin:12px 0; border-radius:12px; }
+button, select, input, textarea { width:100%; padding:12px; margin:6px 0; font-size:16px; }
+button { background:#2f7d32; color:white; border:0; border-radius:10px; }
+textarea { height:70px; }
+.sighting { border-top:1px solid #ddd; padding-top:10px; margin-top:10px; }
+</style>
+</head>
+<body>
 
+<h1>Bird Journal</h1>
+
+<div class="card">
+  <h2>Add sighting</h2>
+
+  <label>Bird</label>
+  <select id="bird">
+    <option>American Robin</option>
+    <option>Northern Cardinal</option>
+    <option>Blue Jay</option>
+    <option>Red-bellied Woodpecker</option>
+    <option>Downy Woodpecker</option>
+    <option>American Goldfinch</option>
+    <option>House Finch</option>
+    <option>Mourning Dove</option>
+    <option>Canada Goose</option>
+    <option>Mallard</option>
+    <option>Great Blue Heron</option>
+    <option>Red-winged Blackbird</option>
+    <option>Common Grackle</option>
+    <option>Song Sparrow</option>
+    <option>Carolina Wren</option>
+    <option>White-breasted Nuthatch</option>
+    <option>Tufted Titmouse</option>
+    <option>Black-capped Chickadee</option>
+    <option>Eastern Wood-Pewee</option>
+    <option>Warbling Vireo</option>
+    <option>Other</option>
+  </select>
+
+  <label>Location</label>
+  <input id="location" placeholder="Park, pond, backyard, etc.">
+
+  <label>Notes</label>
+  <textarea id="notes" placeholder="Behavior, sound, color, where you saw it..."></textarea>
+
+  <button onclick="saveSighting()">Save sighting</button>
+</div>
+
+<div class="card">
+  <h2>My sightings</h2>
+  <div id="sightings"></div>
+</div>
+
+<script>
+function saveSighting() {
+  const sighting = {
+    bird: document.getElementById("bird").value,
+    location: document.getElementById("location").value,
+    notes: document.getElementById("notes").value,
+    date: new Date().toLocaleString()
+  };
+
+  const sightings = JSON.parse(localStorage.getItem("sightings") || "[]");
+  sightings.unshift(sighting);
+  localStorage.setItem("sightings", JSON.stringify(sightings));
+
+  document.getElementById("notes").value = "";
+  showSightings();
+}
+
+function showSightings() {
+  const sightings = JSON.parse(localStorage.getItem("sightings") || "[]");
+  const div = document.getElementById("sightings");
+
+  if (sightings.length === 0) {
+    div.innerHTML = "No sightings yet.";
+    return;
+  }
+
+  div.innerHTML = sightings.map(s => `
+    <div class="sighting">
+      <strong>${s.bird}</strong><br>
+      ${s.date}<br>
+      <em>${s.location || "No location"}</em><br>
+      ${s.notes || ""}
+    </div>
+  `).join("");
+}
+
+showSightings();
+</script>
+
+</body>
+</html>
