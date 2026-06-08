@@ -1,102 +1,587 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bird Journal</title>
-<style>
-body { font-family: Arial; padding: 16px; background:#f4f7f3; }
-h1 { color:#234; }
-.card { background:white; padding:14px; margin:12px 0; border-radius:12px; }
-button, select, input, textarea { width:100%; padding:12px; margin:6px 0; font-size:16px; }
-button { background:#2f7d32; color:white; border:0; border-radius:10px; }
-textarea { height:70px; }
-.sighting { border-top:1px solid #ddd; padding-top:10px; margin-top:10px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f2937" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Strength" />
+  <title>Vince Strength Tracker</title>
+  <style>
+    :root {
+      --bg: #f6f4ef;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --good: #16a34a;
+      --warn: #f59e0b;
+      --shadow: 0 8px 24px rgba(0,0,0,.08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding-bottom: 88px;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(246,244,239,.94);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(229,231,235,.8);
+      padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
+    }
+    h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; }
+    .subtitle { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    main { padding: 14px; max-width: 760px; margin: 0 auto; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin: 12px 0;
+    }
+    .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .muted { color: var(--muted); }
+    .small { font-size: 13px; }
+    .section-title { font-size: 17px; margin: 0 0 8px; }
+    .workout-title { font-size: 21px; margin: 0; }
+    .task {
+      display: grid;
+      grid-template-columns: 32px 1fr;
+      gap: 10px;
+      padding: 12px 0;
+      border-top: 1px solid var(--line);
+    }
+    .task:first-of-type { border-top: 0; }
+    input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      margin-top: 1px;
+      accent-color: var(--accent);
+    }
+    .task-name { font-weight: 650; }
+    .task-detail { color: var(--muted); font-size: 14px; margin-top: 3px; }
+    .task.done .task-name { text-decoration: line-through; color: var(--muted); }
+    .input-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    label.field { display: block; font-size: 13px; color: var(--muted); }
+    input[type="number"], input[type="text"], textarea, select {
+      width: 100%;
+      margin-top: 5px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font: inherit;
+      background: #fff;
+      color: var(--text);
+    }
+    textarea { min-height: 78px; resize: vertical; }
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      background: var(--accent);
+      color: white;
+    }
+    button.secondary {
+      background: #eef2ff;
+      color: #3730a3;
+    }
+    button.ghost {
+      background: transparent;
+      color: var(--accent);
+      padding: 8px 2px;
+      font-weight: 700;
+    }
+    .progress-wrap {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--good);
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+    nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid var(--line);
+      padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    nav button {
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 8px 4px;
+      border-radius: 12px;
+    }
+    nav button.active {
+      background: var(--accent-soft);
+      color: #1d4ed8;
+    }
+    .hidden { display: none !important; }
+    .history-item {
+      border-top: 1px solid var(--line);
+      padding: 10px 0;
+    }
+    .danger { background: #fee2e2; color: #991b1b; }
+    .note-box {
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      border-radius: 14px;
+      padding: 12px;
+      color: #713f12;
+      font-size: 14px;
+    }
+    @media (max-width: 420px) {
+      .input-grid { grid-template-columns: 1fr; }
+      main { padding: 10px; }
+      .card { padding: 14px; }
+    }
+  </style>
 </head>
 <body>
+<header>
+  <h1>Strength & Longevity</h1>
+  <div class="subtitle" id="headerSub">This is all I have to do today.</div>
+</header>
 
-<h1>Bird Journal</h1>
+<main>
+  <section id="tabToday">
+    <div class="card">
+      <div class="row">
+        <div>
+          <p class="muted small" id="todayDate"></p>
+          <h2 class="workout-title" id="todayTitle"></h2>
+        </div>
+        <span class="pill" id="phasePill"></span>
+      </div>
+      <div class="progress-wrap"><div class="progress-bar" id="todayProgress"></div></div>
+      <p class="small muted" id="todayPercent"></p>
+    </div>
 
-<div class="card">
-  <h2>Add sighting</h2>
+    <div class="card">
+      <h3 class="section-title">Today’s checklist</h3>
+      <div id="taskList"></div>
+      <div id="dailyInputs" class="input-grid"></div>
+      <label class="field" style="margin-top:12px;">Notes
+        <textarea id="dailyNotes" placeholder="Back felt okay, weights used, anything worth remembering..."></textarea>
+      </label>
+    </div>
 
-  <label>Bird</label>
-  <select id="bird">
-    <option>American Robin</option>
-    <option>Northern Cardinal</option>
-    <option>Blue Jay</option>
-    <option>Red-bellied Woodpecker</option>
-    <option>Downy Woodpecker</option>
-    <option>American Goldfinch</option>
-    <option>House Finch</option>
-    <option>Mourning Dove</option>
-    <option>Canada Goose</option>
-    <option>Mallard</option>
-    <option>Great Blue Heron</option>
-    <option>Red-winged Blackbird</option>
-    <option>Common Grackle</option>
-    <option>Song Sparrow</option>
-    <option>Carolina Wren</option>
-    <option>White-breasted Nuthatch</option>
-    <option>Tufted Titmouse</option>
-    <option>Black-capped Chickadee</option>
-    <option>Eastern Wood-Pewee</option>
-    <option>Warbling Vireo</option>
-    <option>Other</option>
-  </select>
+    <div class="card">
+      <div class="row">
+        <button id="completeDayBtn">Mark today complete</button>
+        <button class="secondary" id="resetTodayBtn">Reset today</button>
+      </div>
+      <p class="small muted">Progress saves automatically on this phone.</p>
+    </div>
+  </section>
 
-  <label>Location</label>
-  <input id="location" placeholder="Park, pond, backyard, etc.">
+  <section id="tabWeek" class="hidden">
+    <div class="card">
+      <h2 class="section-title">This week</h2>
+      <p class="muted small" id="weekRange"></p>
+      <div class="progress-wrap"><div class="progress-bar" id="weekProgress"></div></div>
+      <p class="small muted" id="weekPercent"></p>
+    </div>
+    <div id="weekCards"></div>
+  </section>
 
-  <label>Notes</label>
-  <textarea id="notes" placeholder="Behavior, sound, color, where you saw it..."></textarea>
+  <section id="tabProgram" class="hidden">
+    <div class="card">
+      <h2 class="section-title">12-week progression</h2>
+      <label class="field">Program start date
+        <input type="text" id="startDate" placeholder="YYYY-MM-DD">
+      </label>
+      <p class="small muted">Set this once. The app uses it to show Phase 1, 2, or 3.</p>
+      <button class="secondary" id="saveStart">Save start date</button>
+    </div>
+    <div class="card">
+      <h3>Phase 1: Weeks 1-4</h3>
+      <p><b>Goal:</b> Build the habit. Keep it clean and easy.</p>
+      <p>Strength exercises use 2 sets. Carries are 2 rounds. Walks are 20-40 minutes.</p>
+    </div>
+    <div class="card">
+      <h3>Phase 2: Weeks 5-8</h3>
+      <p><b>Goal:</b> Add volume without adding complexity.</p>
+      <p>Most strength exercises move to 3 sets. Balance moves toward 30 seconds each side.</p>
+    </div>
+    <div class="card">
+      <h3>Phase 3: Weeks 9-12</h3>
+      <p><b>Goal:</b> Slightly more reps and longer carries.</p>
+      <p>Strength exercises move toward 10-12 reps. Carries move toward 45 seconds.</p>
+    </div>
+    <div class="card note-box">
+      Back rule: any movement that irritates your low back gets lighter, smaller, slower, or skipped. This program should make life easier, not turn you into a hero with a heating pad.
+    </div>
+  </section>
 
-  <button onclick="saveSighting()">Save sighting</button>
-</div>
+  <section id="tabHistory" class="hidden">
+    <div class="card">
+      <h2 class="section-title">History</h2>
+      <p class="muted small" id="historySummary"></p>
+      <button class="secondary" id="exportBtn">Export data</button>
+      <button class="danger" id="clearBtn" style="margin-left:6px;">Clear all</button>
+    </div>
+    <div id="historyList" class="card"></div>
+  </section>
+</main>
 
-<div class="card">
-  <h2>My sightings</h2>
-  <div id="sightings"></div>
-</div>
+<nav>
+  <button class="active" data-tab="Today">Today</button>
+  <button data-tab="Week">Week</button>
+  <button data-tab="Program">Program</button>
+  <button data-tab="History">History</button>
+</nav>
 
 <script>
-function saveSighting() {
-  const sighting = {
-    bird: document.getElementById("bird").value,
-    location: document.getElementById("location").value,
-    notes: document.getElementById("notes").value,
-    date: new Date().toLocaleString()
+const STORAGE_KEY = "vince_strength_tracker_v2";
+
+const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+function isoDate(d) {
+  const x = new Date(d);
+  x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+  return x.toISOString().slice(0,10);
+}
+function prettyDate(d) {
+  return new Date(d + "T12:00:00").toLocaleDateString(undefined, {weekday:"long", month:"short", day:"numeric"});
+}
+function startOfWeek(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.setDate(diff));
+}
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function defaultStartDate() { return isoDate(new Date()); }
+
+let state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null") || {
+  startDate: defaultStartDate(),
+  days: {}
+};
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function phaseInfo() {
+  const start = new Date(state.startDate + "T12:00:00");
+  const now = new Date();
+  const days = Math.max(0, Math.floor((now - start) / 86400000));
+  const week = Math.floor(days / 7) + 1;
+  let phase = 1;
+  if (week >= 5 && week <= 8) phase = 2;
+  if (week >= 9) phase = 3;
+  return { week, phase };
+}
+
+function workoutForDate(dateISO) {
+  const d = new Date(dateISO + "T12:00:00");
+  const day = d.getDay();
+  const { phase } = phaseInfo();
+
+  const p = {
+    setsMain: phase === 1 ? "2 sets" : "3 sets",
+    squatReps: phase === 1 ? "8 reps" : phase === 2 ? "8 reps" : "10 reps",
+    pushReps: phase === 1 ? "8 reps" : phase === 2 ? "8 reps" : "10 reps",
+    rowReps: phase === 1 ? "8 each side" : phase === 2 ? "8 each side" : "10 each side",
+    carry: phase === 3 ? "3 rounds × 45 seconds" : phase === 2 ? "3 rounds × 30 seconds" : "2 rounds × 30 seconds",
+    balance: phase === 1 ? "20 seconds each side × 2" : phase === 2 ? "30 seconds each side" : "45 seconds each side",
+    walkWed: phase === 1 ? "20 minutes" : phase === 2 ? "25 minutes" : "30 minutes",
+    weekendWalk: phase === 1 ? "20-40 minutes" : phase === 2 ? "30-40 minutes" : "40 minutes",
+    birdDog: phase === 1 ? "5 each side" : phase === 2 ? "8 each side" : "10 each side",
+    sitStand: phase === 1 ? "2 sets × 10" : phase === 2 ? "3 sets × 10" : "3 sets × 12",
+    deadlift: phase === 1 ? "2 sets × 8" : phase === 2 ? "3 sets × 8" : "3 sets × 10",
+    press: phase === 1 ? "2 sets × 8" : phase === 2 ? "3 sets × 8" : "3 sets × 10"
   };
 
-  const sightings = JSON.parse(localStorage.getItem("sightings") || "[]");
-  sightings.unshift(sighting);
-  localStorage.setItem("sightings", JSON.stringify(sightings));
-
-  document.getElementById("notes").value = "";
-  showSightings();
+  if (day === 1) return {
+    type: "Strength A",
+    title: "Monday - Strength A",
+    inputs: ["weightUsed"],
+    tasks: [
+      ["warmup", "Warm-up", "Walk 2 minutes, arm circles, march in place"],
+      ["squat", "Goblet squat or chair squat", `${p.setsMain} × ${p.squatReps}`],
+      ["pushup", "Counter push-ups", `${p.setsMain} × ${p.pushReps}`],
+      ["row", "One-arm dumbbell row", `${p.setsMain} × ${p.rowReps}`],
+      ["carry", "Farmer carry", p.carry],
+      ["balance", "Single-leg balance", p.balance]
+    ]
+  };
+  if (day === 3) return {
+    type: "Walk & Mobility",
+    title: "Wednesday - Walk & Mobility",
+    inputs: ["walkMinutes"],
+    tasks: [
+      ["walk", "Walk", p.walkWed],
+      ["hip", "Hip stretch", "30 seconds each side"],
+      ["trunk", "Gentle trunk rotations", "10 reps"],
+      ["shoulder", "Shoulder rolls", "10 reps"]
+    ]
+  };
+  if (day === 5) return {
+    type: "Strength B",
+    title: "Friday - Strength B",
+    inputs: ["weightUsed"],
+    tasks: [
+      ["warmup", "Warm-up", "Walk 2 minutes, march in place"],
+      ["sitstand", "Sit-to-stand", p.sitStand],
+      ["deadlift", "Dumbbell deadlift", p.deadlift],
+      ["press", "Dumbbell overhead press", p.press],
+      ["birddog", "Bird dog", p.birdDog],
+      ["carry", "Farmer carry", p.carry]
+    ]
+  };
+  if (day === 6 || day === 0) return {
+    type: "Weekend",
+    title: "Weekend - Walk + Floor Get-Ups",
+    inputs: ["walkMinutes"],
+    tasks: [
+      ["walk", "Walk", p.weekendWalk],
+      ["floor1", "Floor get-up 1", "Slow and careful"],
+      ["floor2", "Floor get-up 2", "Slow and careful"],
+      ["floor3", "Floor get-up 3", "Slow and careful"],
+      ["floor4", "Floor get-up 4", "Slow and careful"],
+      ["floor5", "Floor get-up 5", "Slow and careful"]
+    ]
+  };
+  return {
+    type: "Optional",
+    title: `${dayNames[day]} - Rest or easy walk`,
+    inputs: ["walkMinutes"],
+    tasks: [
+      ["rest", "Rest day", "Or take an easy 10-20 minute walk if it feels good"]
+    ]
+  };
 }
 
-function showSightings() {
-  const sightings = JSON.parse(localStorage.getItem("sightings") || "[]");
-  const div = document.getElementById("sightings");
+function getDayState(dateISO) {
+  if (!state.days[dateISO]) state.days[dateISO] = { checks: {}, notes: "", inputs: {}, completed: false };
+  return state.days[dateISO];
+}
 
-  if (sightings.length === 0) {
-    div.innerHTML = "No sightings yet.";
+function completion(dateISO) {
+  const workout = workoutForDate(dateISO);
+  const ds = getDayState(dateISO);
+  const total = workout.tasks.length;
+  const done = workout.tasks.filter(t => ds.checks[t[0]]).length;
+  return { done, total, pct: total ? Math.round(done / total * 100) : 0 };
+}
+
+function renderToday() {
+  const today = isoDate(new Date());
+  const workout = workoutForDate(today);
+  const ds = getDayState(today);
+  const { week, phase } = phaseInfo();
+
+  document.getElementById("todayDate").textContent = prettyDate(today);
+  document.getElementById("todayTitle").textContent = workout.title;
+  document.getElementById("phasePill").textContent = `Week ${week} · Phase ${phase}`;
+
+  const c = completion(today);
+  document.getElementById("todayProgress").style.width = c.pct + "%";
+  document.getElementById("todayPercent").textContent = `${c.done} of ${c.total} items complete`;
+
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+  workout.tasks.forEach(([id, name, detail]) => {
+    const div = document.createElement("div");
+    div.className = "task" + (ds.checks[id] ? " done" : "");
+    div.innerHTML = `
+      <input type="checkbox" ${ds.checks[id] ? "checked" : ""} data-check="${id}">
+      <div><div class="task-name">${name}</div><div class="task-detail">${detail}</div></div>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll("input[type=checkbox]").forEach(cb => {
+    cb.addEventListener("change", e => {
+      ds.checks[e.target.dataset.check] = e.target.checked;
+      save();
+      renderToday();
+    });
+  });
+
+  const inputs = document.getElementById("dailyInputs");
+  inputs.innerHTML = "";
+  if (workout.inputs.includes("walkMinutes")) {
+    inputs.innerHTML += `<label class="field">Walk minutes<input type="number" id="walkMinutes" value="${ds.inputs.walkMinutes || ""}" placeholder="20"></label>`;
+  }
+  if (workout.inputs.includes("weightUsed")) {
+    inputs.innerHTML += `<label class="field">Weight used<input type="text" id="weightUsed" value="${ds.inputs.weightUsed || ""}" placeholder="Example: 10 lb DBs"></label>`;
+  }
+  inputs.querySelectorAll("input").forEach(inp => {
+    inp.addEventListener("input", e => {
+      ds.inputs[e.target.id] = e.target.value;
+      save();
+    });
+  });
+  const notes = document.getElementById("dailyNotes");
+  notes.value = ds.notes || "";
+  notes.oninput = e => { ds.notes = e.target.value; save(); };
+}
+
+function renderWeek() {
+  const monday = startOfWeek(new Date());
+  const sunday = addDays(monday, 6);
+  document.getElementById("weekRange").textContent = `${prettyDate(isoDate(monday))} to ${prettyDate(isoDate(sunday))}`;
+  const cards = document.getElementById("weekCards");
+  cards.innerHTML = "";
+  let done = 0, total = 0;
+  for (let i=0;i<7;i++) {
+    const dateISO = isoDate(addDays(monday, i));
+    const workout = workoutForDate(dateISO);
+    const c = completion(dateISO);
+    done += c.done; total += c.total;
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<div class="row"><div><b>${prettyDate(dateISO)}</b><div class="small muted">${workout.title}</div></div><span class="pill">${c.pct}%</span></div>
+    <div class="progress-wrap"><div class="progress-bar" style="width:${c.pct}%"></div></div>`;
+    cards.appendChild(div);
+  }
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById("weekProgress").style.width = pct + "%";
+  document.getElementById("weekPercent").textContent = `${done} of ${total} items complete this week`;
+}
+
+function renderHistory() {
+  const keys = Object.keys(state.days).sort().reverse();
+  const meaningful = keys.filter(k => {
+    const d = state.days[k];
+    return Object.values(d.checks || {}).some(Boolean) || d.notes || Object.values(d.inputs || {}).some(Boolean);
+  });
+  document.getElementById("historySummary").textContent = `${meaningful.length} days with saved activity.`;
+  const list = document.getElementById("historyList");
+  if (!meaningful.length) {
+    list.innerHTML = `<p class="muted">No saved workouts yet.</p>`;
     return;
   }
-
-  div.innerHTML = sightings.map(s => `
-    <div class="sighting">
-      <strong>${s.bird}</strong><br>
-      ${s.date}<br>
-      <em>${s.location || "No location"}</em><br>
-      ${s.notes || ""}
-    </div>
-  `).join("");
+  list.innerHTML = "";
+  meaningful.slice(0, 30).forEach(k => {
+    const c = completion(k);
+    const ds = state.days[k];
+    const div = document.createElement("div");
+    div.className = "history-item";
+    div.innerHTML = `<b>${prettyDate(k)}</b><div class="small muted">${workoutForDate(k).type} · ${c.done}/${c.total} complete</div>
+      ${ds.inputs.walkMinutes ? `<div class="small">Walk: ${ds.inputs.walkMinutes} minutes</div>` : ""}
+      ${ds.inputs.weightUsed ? `<div class="small">Weights: ${ds.inputs.weightUsed}</div>` : ""}
+      ${ds.notes ? `<div class="small muted">${ds.notes}</div>` : ""}`;
+    list.appendChild(div);
+  });
 }
 
-showSightings();
-</script>
+function renderProgram() {
+  document.getElementById("startDate").value = state.startDate || "";
+}
 
+function switchTab(tab) {
+  ["Today","Week","Program","History"].forEach(t => {
+    document.getElementById("tab"+t).classList.toggle("hidden", t !== tab);
+    document.querySelector(`nav button[data-tab="${t}"]`).classList.toggle("active", t === tab);
+  });
+  if (tab === "Today") renderToday();
+  if (tab === "Week") renderWeek();
+  if (tab === "Program") renderProgram();
+  if (tab === "History") renderHistory();
+}
+
+document.querySelectorAll("nav button").forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+
+document.getElementById("completeDayBtn").onclick = () => {
+  const today = isoDate(new Date());
+  const workout = workoutForDate(today);
+  const ds = getDayState(today);
+  workout.tasks.forEach(([id]) => ds.checks[id] = true);
+  ds.completed = true;
+  save();
+  renderToday();
+};
+
+document.getElementById("resetTodayBtn").onclick = () => {
+  const today = isoDate(new Date());
+  if (confirm("Reset today's checkmarks?")) {
+    state.days[today] = { checks: {}, notes: "", inputs: {}, completed: false };
+    save();
+    renderToday();
+  }
+};
+
+document.getElementById("saveStart").onclick = () => {
+  const v = document.getElementById("startDate").value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(v)) { alert("Use YYYY-MM-DD format."); return; }
+  state.startDate = v;
+  save();
+  renderProgram();
+  renderToday();
+  alert("Start date saved.");
+};
+
+document.getElementById("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "vince-strength-tracker-data.json";
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+document.getElementById("clearBtn").onclick = () => {
+  if (confirm("Clear all saved tracker data on this phone?")) {
+    localStorage.removeItem(STORAGE_KEY);
+    state = { startDate: defaultStartDate(), days: {} };
+    save();
+    renderHistory();
+  }
+};
+
+renderToday();
+</script>
 </body>
 </html>
